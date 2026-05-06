@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: marginalia-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-marginalia}
+      POSTGRES_USER: ${DB_USERNAME:-marginalia}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-marginalia}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - marginalia-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-marginalia} -d ${DB_NAME:-marginalia}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  marginalia-postgres-data:
