@@ -84,12 +84,12 @@ class AnnotationServiceTest {
     }
 
     @Test
-    @DisplayName("save() — 다른 유저 문서에 저장 시도면 DocumentNotFoundException")
+    @DisplayName("save() — 다른 유저 문서에 저장 시도면 UnauthorizedException (403, 문서 존재 누설 방지)")
     void save_otherUserDocumentThrows() {
         given(documentPort.findById(DOC_ID)).willReturn(Optional.of(readyDocument(OTHER_ID)));
 
         assertThatThrownBy(() -> annotationService.save(saveCommand(null)))
-                .isInstanceOf(DocumentNotFoundException.class);
+                .isInstanceOf(UnauthorizedException.class);
 
         then(annotationPort).shouldHaveNoInteractions();
     }

@@ -24,10 +24,11 @@ public class AnnotationService implements AnnotationUseCase {
 
     @Override
     public AnnotationResult save(SaveCommand command) {
-        // 문서 존재 + 소유권 확인
-        documentPort.findById(command.documentId())
-                .filter(doc -> doc.isOwnedBy(command.userId()))
+        var document = documentPort.findById(command.documentId())
                 .orElseThrow(() -> new DocumentNotFoundException(command.documentId()));
+        if (!document.isOwnedBy(command.userId())) {
+            throw new UnauthorizedException("문서에 접근 권한이 없습니다.");
+        }
 
         Annotation annotation = annotationPort.save(
                 Annotation.create(
