@@ -26,8 +26,9 @@ management:
         include: health, info
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiry-ms: ${JWT_EXPIRY_MS:86400000}
+  secret: ${JWT_SECRET:local-dev-secret-must-be-at-least-256-bits-long!!}
+  access-expiry-ms: ${JWT_ACCESS_EXPIRY_MS:900000}      # 15분
+  refresh-expiry-ms: ${JWT_REFRESH_EXPIRY_MS:604800000} # 7일
 
 storage:
   type: ${STORAGE_TYPE:local}
