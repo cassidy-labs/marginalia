@@ -1,7 +1,7 @@
 CREATE TABLE refresh_tokens (
     id         UUID         NOT NULL DEFAULT gen_random_uuid(),
     user_id    UUID         NOT NULL,
-    token      VARCHAR(512) NOT NULL,
+    token      CHAR(64)     NOT NULL,  -- SHA-256 hex digest (raw token은 클라이언트에만 존재)
     expires_at TIMESTAMPTZ  NOT NULL,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 
