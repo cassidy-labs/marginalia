@@ -3,13 +3,22 @@ plugins {
     id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.hibernate.orm") version "7.2.12.Final"
-    id("org.graalvm.buildtools.native") version "0.11.5"
     id("org.asciidoctor.jvm.convert") version "4.0.5"
 }
 
 group = "org.cassidylabs"
 version = "0.0.1-SNAPSHOT"
 description = "marginalia"
+
+// Per-machine build directory override.
+// On Windows, the JVM launcher reads @file arguments using the system ANSI code page
+// (CP949 on Korean Windows), which corrupts UTF-8 paths and breaks the test classloader.
+// Machines where the project path contains non-ASCII characters must set this property
+// in ~/.gradle/gradle.properties — never commit that value here.
+//   marginalia.buildDir=C:/builds/marginalia
+(findProperty("marginalia.buildDir") as String?)?.let {
+    layout.buildDirectory.set(file(it))
+}
 
 java {
     toolchain {
@@ -21,7 +30,7 @@ repositories {
     mavenCentral()
 }
 
-extra["snippetsDir"] = file("build/generated-snippets")
+extra["snippetsDir"] = layout.buildDirectory.dir("generated-snippets").get().asFile
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")

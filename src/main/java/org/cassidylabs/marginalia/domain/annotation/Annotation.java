@@ -72,7 +72,8 @@ public class Annotation extends BaseTimeEntity {
             String quoteSelector,
             String textSnapshot,
             AnnotationType type,
-            AnnotationColor color
+            AnnotationColor color,
+            String memo
     ) {
         if (pageNumber < 1) {
             throw new IllegalArgumentException("페이지 번호는 1 이상이어야 합니다: " + pageNumber);
@@ -86,6 +87,7 @@ public class Annotation extends BaseTimeEntity {
                 .textSnapshot(textSnapshot)
                 .type(type)
                 .color(color)
+                .memo(memo)
                 .build();
     }
 
