@@ -53,12 +53,13 @@ public class Document extends BaseTimeEntity {
      * 업로드 완료 확인.
      * PENDING → READY 상태 전이.
      */
-    public void confirm(long fileSize) {
+    /** PENDING → READY. fileSize는 클라이언트가 함께 보낼 경우에만 업데이트. */
+    public void confirm(Long fileSize) {
         if (this.status != DocumentStatus.PENDING) {
             throw new IllegalStateException("이미 확인된 문서입니다: " + id);
         }
         this.status = DocumentStatus.READY;
-        this.fileSize = fileSize;
+        if (fileSize != null) this.fileSize = fileSize;
     }
 
     public boolean isReady() {

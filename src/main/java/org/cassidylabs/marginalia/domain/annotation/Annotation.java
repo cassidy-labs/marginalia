@@ -72,7 +72,8 @@ public class Annotation extends BaseTimeEntity {
             String quoteSelector,
             String textSnapshot,
             AnnotationType type,
-            AnnotationColor color
+            AnnotationColor color,
+            String memo
     ) {
         return Annotation.builder()
                 .documentId(documentId)
@@ -83,6 +84,7 @@ public class Annotation extends BaseTimeEntity {
                 .textSnapshot(textSnapshot)
                 .type(type)
                 .color(color)
+                .memo(memo)
                 .build();
     }
 
