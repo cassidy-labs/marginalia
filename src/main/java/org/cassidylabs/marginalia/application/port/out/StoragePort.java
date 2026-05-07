@@ -18,5 +18,10 @@ public interface StoragePort {
      */
     String generateViewUrl(String key);
 
+    /**
+     * 오브젝트가 실제로 존재하는지 확인.
+     */
+    boolean exists(String key);
+
     void delete(String key);
 }

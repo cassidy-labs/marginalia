@@ -8,6 +8,7 @@ import org.cassidylabs.marginalia.domain.document.DocumentStatus;
 import org.cassidylabs.marginalia.global.exception.DocumentNotFoundException;
 import org.cassidylabs.marginalia.global.exception.DocumentNotReadyException;
 import org.cassidylabs.marginalia.global.exception.UnauthorizedException;
+import org.cassidylabs.marginalia.global.exception.UploadNotCompleteException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,6 +62,7 @@ class DocumentServiceTest {
     void confirmUpload_transitionsToReady() {
         Document doc = pendingDocument();
         given(documentPort.findById(DOC_ID)).willReturn(Optional.of(doc));
+        given(storagePort.exists(doc.getR2Key())).willReturn(true);
         given(documentPort.save(any())).willReturn(doc);
 
         documentService.confirmUpload(new ConfirmCommand(DOC_ID, USER_ID, 2048L));
@@ -75,11 +77,25 @@ class DocumentServiceTest {
     void confirmUpload_nullFileSizeTreatedAsZero() {
         Document doc = pendingDocument();
         given(documentPort.findById(DOC_ID)).willReturn(Optional.of(doc));
+        given(storagePort.exists(doc.getR2Key())).willReturn(true);
         given(documentPort.save(any())).willReturn(doc);
 
         assertThatCode(() -> documentService.confirmUpload(new ConfirmCommand(DOC_ID, USER_ID, null)))
                 .doesNotThrowAnyException();
         assertThat(doc.getFileSize()).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("confirmUpload() — 스토리지에 파일 없으면 UploadNotCompleteException")
+    void confirmUpload_storageObjectMissingThrows() {
+        Document doc = pendingDocument();
+        given(documentPort.findById(DOC_ID)).willReturn(Optional.of(doc));
+        given(storagePort.exists(doc.getR2Key())).willReturn(false);
+
+        assertThatThrownBy(() -> documentService.confirmUpload(new ConfirmCommand(DOC_ID, USER_ID, 1024L)))
+                .isInstanceOf(UploadNotCompleteException.class);
+
+        then(documentPort).should(never()).save(any());
     }
 
     @Test

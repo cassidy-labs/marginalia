@@ -8,6 +8,7 @@ import org.cassidylabs.marginalia.domain.document.Document;
 import org.cassidylabs.marginalia.global.exception.DocumentNotFoundException;
 import org.cassidylabs.marginalia.global.exception.DocumentNotReadyException;
 import org.cassidylabs.marginalia.global.exception.UnauthorizedException;
+import org.cassidylabs.marginalia.global.exception.UploadNotCompleteException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -37,6 +38,9 @@ public class DocumentService implements DocumentUseCase {
     @Override
     public void confirmUpload(ConfirmCommand command) {
         Document document = getOwnedDocument(command.documentId(), command.userId());
+        if (!storagePort.exists(document.getR2Key())) {
+            throw new UploadNotCompleteException(command.documentId());
+        }
         document.confirm(command.fileSize() != null ? command.fileSize() : 0L);
         documentPort.save(document);
     }
