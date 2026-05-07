@@ -10,6 +10,8 @@ import org.cassidylabs.marginalia.global.exception.DocumentNotReadyException;
 import org.cassidylabs.marginalia.global.exception.UnauthorizedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.UUID;
@@ -62,8 +64,11 @@ public class DocumentService implements DocumentUseCase {
     @Override
     public void deleteDocument(UUID documentId, UUID userId) {
         Document document = getOwnedDocument(documentId, userId);
-        storagePort.delete(document.getR2Key());
+        String r2Key = document.getR2Key();
         documentPort.delete(document);
+        // Schedule the irreversible blob delete for after the transaction commits.
+        // If the transaction rolls back, the file is preserved alongside the DB record.
+        afterCommit(() -> storagePort.delete(r2Key));
     }
 
     // ── private ───────────────────────────────────────────────────────────────
@@ -83,5 +88,20 @@ public class DocumentService implements DocumentUseCase {
 
     private DocumentViewResult toViewResult(Document d, String viewUrl) {
         return new DocumentViewResult(d.getId(), d.getFileName(), viewUrl, d.getFileSize(), d.getCreatedAt());
+    }
+
+    // Runs the action after the current transaction commits. Falls back to immediate
+    // execution when called outside a transaction (e.g., unit tests).
+    private static void afterCommit(Runnable action) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    action.run();
+                }
+            });
+        } else {
+            action.run();
+        }
     }
 }
