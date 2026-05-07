@@ -35,7 +35,7 @@ public class DocumentService implements DocumentUseCase {
     @Override
     public void confirmUpload(ConfirmCommand command) {
         Document document = getOwnedDocument(command.documentId(), command.userId());
-        document.confirm(command.fileSize());
+        document.confirm(command.fileSize() != null ? command.fileSize() : 0L);
         documentPort.save(document);
     }
 

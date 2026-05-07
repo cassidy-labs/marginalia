@@ -3,13 +3,18 @@ plugins {
     id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.hibernate.orm") version "7.2.12.Final"
-    id("org.graalvm.buildtools.native") version "0.11.5"
     id("org.asciidoctor.jvm.convert") version "4.0.5"
 }
 
 group = "org.cassidylabs"
 version = "0.0.1-SNAPSHOT"
 description = "marginalia"
+
+// The project path contains non-ASCII (Korean) characters. The JVM launcher on Windows
+// reads @file arguments using the system ANSI code page (CP949), which corrupts UTF-8
+// encoded paths and breaks the test classloader. Redirecting the build directory to an
+// ASCII-only path avoids this.
+layout.buildDirectory.set(file("C:/builds/marginalia"))
 
 java {
     toolchain {
