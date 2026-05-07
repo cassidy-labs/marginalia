@@ -75,6 +75,9 @@ public class Annotation extends BaseTimeEntity {
             AnnotationColor color,
             String memo
     ) {
+        if (pageNumber < 1) {
+            throw new IllegalArgumentException("페이지 번호는 1 이상이어야 합니다: " + pageNumber);
+        }
         return Annotation.builder()
                 .documentId(documentId)
                 .userId(userId)

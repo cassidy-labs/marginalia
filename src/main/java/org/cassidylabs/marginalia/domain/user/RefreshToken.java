@@ -23,7 +23,12 @@ public class RefreshToken extends BaseTimeEntity {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(name = "token", nullable = false, unique = true, length = 512)
+    /**
+     * SHA-256(rawToken) hex digest — 64자 고정.
+     * Raw token은 발급 시 클라이언트에만 전달되고 DB에는 절대 저장되지 않는다.
+     * DB 읽기 누출이 발생해도 원본 토큰을 복원할 수 없다.
+     */
+    @Column(name = "token", nullable = false, unique = true, length = 64)
     private String token;
 
     @Column(name = "expires_at", nullable = false)
