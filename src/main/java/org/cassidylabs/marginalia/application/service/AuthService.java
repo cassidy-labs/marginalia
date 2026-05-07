@@ -34,7 +34,7 @@ public class AuthService implements AuthUseCase {
     @Override
     public TokenResult register(RegisterCommand command) {
         if (userPort.existsByEmail(command.email())) {
-            throw new EmailAlreadyExistsException(command.email());
+            throw new EmailAlreadyExistsException();
         }
         User user = userPort.save(User.create(command.email(), passwordHasher.hash(command.password())));
         return issueTokenPair(user.getId());
