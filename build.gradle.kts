@@ -10,11 +10,15 @@ group = "org.cassidylabs"
 version = "0.0.1-SNAPSHOT"
 description = "marginalia"
 
-// The project path contains non-ASCII (Korean) characters. The JVM launcher on Windows
-// reads @file arguments using the system ANSI code page (CP949), which corrupts UTF-8
-// encoded paths and breaks the test classloader. Redirecting the build directory to an
-// ASCII-only path avoids this.
-layout.buildDirectory.set(file("C:/builds/marginalia"))
+// Per-machine build directory override.
+// On Windows, the JVM launcher reads @file arguments using the system ANSI code page
+// (CP949 on Korean Windows), which corrupts UTF-8 paths and breaks the test classloader.
+// Machines where the project path contains non-ASCII characters must set this property
+// in ~/.gradle/gradle.properties — never commit that value here.
+//   marginalia.buildDir=C:/builds/marginalia
+(findProperty("marginalia.buildDir") as String?)?.let {
+    layout.buildDirectory.set(file(it))
+}
 
 java {
     toolchain {
@@ -26,7 +30,7 @@ repositories {
     mavenCentral()
 }
 
-extra["snippetsDir"] = file("build/generated-snippets")
+extra["snippetsDir"] = layout.buildDirectory.dir("generated-snippets").get().asFile
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
